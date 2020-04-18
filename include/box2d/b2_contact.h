@@ -101,6 +101,13 @@ public:
 	/// Has this contact been disabled?
 	bool IsEnabled() const;
 
+	/// Activate/Deactivate this contact. This can be used inside the BeginContact
+	/// contact listener. This disables the contact and prevents it from being reenabled.
+	void SetActive(bool flag);
+
+	/// Has this contact been deactivated?
+	bool IsActive() const;
+
 	/// Get the next contact in the world's contact list.
 	b2Contact* GetNext();
 	const b2Contact* GetNext() const;
@@ -174,7 +181,10 @@ protected:
 		e_bulletHitFlag		= 0x0010,
 
 		// This contact has a valid TOI in m_toi
-		e_toiFlag			= 0x0020
+		e_toiFlag			= 0x0020,
+
+		// This contact is currently active
+		e_activedFlag		= 0x0040
 	};
 
 	/// Flag this contact for filtering. Filtering will occur the next time step.
@@ -258,6 +268,24 @@ inline void b2Contact::SetEnabled(bool flag)
 inline bool b2Contact::IsEnabled() const
 {
 	return (m_flags & e_enabledFlag) == e_enabledFlag;
+}
+
+inline void b2Contact::SetActive(bool flag)
+{
+	if (flag)
+	{
+		m_flags |= e_activedFlag;
+	}
+	else
+	{
+		m_flags &= ~e_activedFlag;
+	}
+	SetEnabled(flag);
+}
+
+inline bool b2Contact::IsActive() const
+{
+	return (m_flags & e_activedFlag) == e_activedFlag;
 }
 
 inline bool b2Contact::IsTouching() const
