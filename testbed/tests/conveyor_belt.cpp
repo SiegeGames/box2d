@@ -45,26 +45,44 @@ public:
 			b2Body* body = m_world->CreateBody(&bd);
 
 			b2PolygonShape shape;
-			shape.SetAsBox(10.0f, 0.5f);
+			shape.SetAsBox(50000.0f, 0.5f);
 
 			b2FixtureDef fd;
 			fd.shape = &shape;
-			fd.friction = 0.8f;
+			fd.friction = 5.f;
 			m_platform = body->CreateFixture(&fd);
 		}
 
 		// Boxes
-		for (int32 i = 0; i < 5; ++i)
+		for (int32 i = 0; i < 20000; ++i)
 		{
 			b2BodyDef bd;
 			bd.type = b2_dynamicBody;
-			bd.position.Set(-10.0f + 2.0f * i, 7.0f);
+            bd.position.Set(-10.0f + 2.0f * i, 7.0f);
+            bd.fixedRotation = true;
 			b2Body* body = m_world->CreateBody(&bd);
 
-			b2PolygonShape shape;
-			shape.SetAsBox(0.5f, 0.5f);
+			b2CircleShape shape;
+			shape.m_radius = 0.5f;
 			body->CreateFixture(&shape, 20.0f);
 		}
+	}
+
+	void BeginContact(b2Contact* contact) {
+        Test::BeginContact(contact);
+
+        b2Fixture* fixtureA = contact->GetFixtureA();
+        b2Fixture* fixtureB = contact->GetFixtureB();
+
+        if (fixtureA == m_platform)
+        {
+            contact->SetTangentSpeed(1.0f);
+        }
+
+        if (fixtureB == m_platform)
+        {
+            contact->SetTangentSpeed(-1.0f);
+        }
 	}
 
 	void PreSolve(b2Contact* contact, const b2Manifold* oldManifold) override
@@ -73,16 +91,6 @@ public:
 
 		b2Fixture* fixtureA = contact->GetFixtureA();
 		b2Fixture* fixtureB = contact->GetFixtureB();
-
-		if (fixtureA == m_platform)
-		{
-			contact->SetTangentSpeed(5.0f);
-		}
-
-		if (fixtureB == m_platform)
-		{
-			contact->SetTangentSpeed(-5.0f);
-		}
 	}
 
 	void Step(Settings& settings) override
